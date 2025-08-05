@@ -1,103 +1,181 @@
-import Image from "next/image";
+"use client"
+
+import Header from "@/components/Header";
+import { RainbowConnectButton } from "@/components/RainbowConnectButton";
+import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { FaEthereum, FaPowerOff, FaInfo } from "react-icons/fa";
+import { useAccount, useBalance, useChainId, useDisconnect } from "wagmi";
+
+interface InputProps {
+  value: string;
+  type: string;
+  id: string; 
+  placeholder: string;
+  setFunction: Dispatch<SetStateAction<string>>
+}
+
+const Input = (props: InputProps) => {
+  return (
+    <input 
+      type={props.type} 
+      id={props.id} 
+      placeholder={props.placeholder}
+      value={props.value}
+      onChange={(event: ChangeEvent<HTMLInputElement>) => props.setFunction(event.target.value)}
+      className="bg-[#211f2a] w-full rounded-sm p-2 outline-none border-none py-2 px-4 placeholder:text-gray-600 shadow shadow-[#211f2a] focus:shadow-lg transition-shadow"
+    />
+  )
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [addressTo, setAddressTo] = useState("");
+  const [amount, setAmount] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [message, setMessage] = useState("");
+  const chainId = useChainId();
+  const { disconnect } = useDisconnect();
+  const { address, isConnected } = useAccount();
+  const { data } = useBalance({
+    address,
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  function getChainName(chainId: number): string {
+    let chainName: string = "";
+    switch (chainId) {
+      case 1:
+        chainName = "Ethereum Mainnet"
+        break;
+      case 137:
+        chainName = "Polygon"
+        break;
+      case 10:
+        chainName = "Optimism"
+        break;
+      case 42161:
+        chainName = "Arbitrum One"
+        break;
+      case 8453: 
+        chainName = "Base Mainnet"
+        break;
+      case 11155111: 
+        chainName = "Sepolia Testnet"
+        break;
+      case 31337: 
+        chainName = "Anvil Local Chain"
+        break;
+      default:
+        chainName = "undefined (please connect)"
+        break;
+    }
+    return chainName;
+  }
+
+  function handleSend(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    console.log("address: ", addressTo)
+    console.log("amount: ", amount)
+    console.log("keyword: ", keyword)
+    console.log("message: ", message)
+  }
+
+  return (
+    <main className="gradient-bg-welcome">
+      <Header/>
+      <section className="flex w-full px-65 py-20">
+        <div className="w-1/2 space-y-8 space-x-25">
+          <p className="text-gradient text-6xl pr-7">
+            Send Crypto across the world
+          </p>
+          <p className="text-gradient text-xl font-light pr-30">
+            Explore the crypto world. Buy and sell cryptocurrencies easily on Krypto.
+          </p>
+          <div className="flex items-center space-x-5">
+            <RainbowConnectButton/>
+            {isConnected && 
+              <button 
+                className="text-white text-xl py-5 px-5 rounded-xl bg-indigo-600 hover:cursor-pointer hover:bg-indigo-700 transition-colors"
+                onClick={() => disconnect()}
+              >
+                <FaPowerOff/>
+              </button>
+            }
+          </div>
+          <div className="flex flex-wrap w-full text-md mt-25">
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-tl-4xl">Reliability</p>
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400">Security</p>
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-tr-4xl">Ethereum</p>
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-bl-4xl">Web 3.0</p>
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400">Low Fees</p>
+            <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-br-4xl">Blockchain</p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <div className="w-1/2 mx-25">
+          <div className="eth-card p-5 mx-20 space-y-10 text-white rounded-2xl">
+            <div className="flex justify-between">
+              <div className="border border-white rounded-4xl p-2">
+                <FaEthereum size={24}/>
+              </div>
+              <div className="flex items-center border border-white p-2 rounded-[50%]">
+                <FaInfo size={15}/>
+              </div>
+            </div>
+            <div>
+              <p className="font-bold">
+                {getChainName(chainId)}
+              </p>
+              <p>
+                {`${address}`}
+              </p>
+              <div>
+                Balance: {data?.formatted} {data?.symbol}
+              </div>
+            </div>
+          </div>
+          <form onSubmit={(event: FormEvent<HTMLFormElement>) => handleSend(event)} className="bg-[#100f14] w-full rounded-2xl shadow-2xl shadow-black text-gray-600 text-lg space-y-8 px-5 py-10 mt-10">
+            <div className="space-y-4">
+              <Input 
+                value={addressTo} 
+                type="text" 
+                id="addressTo" 
+                placeholder="Address To" 
+                setFunction={setAddressTo}
+              />
+              <br />
+              <Input 
+                value={amount} 
+                type="text" 
+                id="amountInEth" 
+                placeholder="Amount (ETH)" 
+                setFunction={setAmount}
+              />
+              <br />
+              <Input 
+                value={keyword} 
+                type="text" 
+                id="keywordGif" 
+                placeholder="Keyword (Gif)" 
+                setFunction={setKeyword}
+              />
+              <br />
+              <Input 
+                value={message}
+                type="text"
+                id="transactionMessage"
+                placeholder="Enter Message"
+                setFunction={setMessage}
+              /> 
+              <br />
+            </div>
+            <hr />
+            <button 
+              type="submit" 
+              className="border border-gray-600 w-full py-3 rounded-4xl text-white hover:cursor-pointer shadow shadow-gray-600 hover:shadow-md transition-shadow"
+            >
+              Send now
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,22 +1,64 @@
 import { NavLink, TransactionProps } from "./types";
 
+export const contractAddress: string =
+  "0xfD5FF465DeD864a8c8eFabdCCEC327b5E1274Ed7";
+
+export const contractAbi = [
+  {
+    inputs: [],
+    name: "KryptTransfer__ReceiverAddressCantBeZero",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "KryptTransfer__TransferAmountCantBeZero",
+    type: "error",
+  },
+  { inputs: [], name: "KryptTransfer__TransferFailed", type: "error" },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "from", type: "address" },
+      { indexed: true, internalType: "address", name: "to", type: "address" },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "EthTransfer",
+    type: "event",
+  },
+  {
+    inputs: [
+      { internalType: "address payable", name: "_to", type: "address" },
+      { internalType: "string", name: "message", type: "string" },
+    ],
+    name: "transferEth",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
+
 export const navLinks: NavLink[] = [
-    {
-        name: "Market",
-        link: "/market"
-    },
-    {
-        name: "Exchange",
-        link: "/exchange"
-    },
-    {
-        name: "Tutorials",
-        link: "/tutorials"
-    },
-    {
-        name: "Wallets",
-        link: "/wallets"
-    },
+  {
+    name: "Market",
+    link: "/market",
+  },
+  {
+    name: "Exchange",
+    link: "/exchange",
+  },
+  {
+    name: "Tutorials",
+    link: "/tutorials",
+  },
+  {
+    name: "Wallets",
+    link: "/wallets",
+  },
 ];
 
 export const mockTransactions: TransactionProps[] = [
@@ -69,4 +111,3 @@ export const mockTransactions: TransactionProps[] = [
     addressTo: "0x8aa395Ab97837576aF9cd6946C79024ef1acfdbE",
   },
 ];
-

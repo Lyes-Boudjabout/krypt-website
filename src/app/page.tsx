@@ -4,21 +4,26 @@ import Header from "@/components/Header";
 import Input from "@/components/InputComponent";
 import { RainbowConnectButton } from "@/components/RainbowConnectButton";
 import ServiceCard from "@/components/ServiceCard";
-import { FormEvent, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { BiSearchAlt } from "react-icons/bi";
 import { BsShieldFillCheck } from "react-icons/bs";
 import { FaEthereum, FaPowerOff, FaInfo } from "react-icons/fa";
-import { RiHeart2Fill } from "react-icons/ri";
-import { useAccount, useBalance, useChainId, useDisconnect } from "wagmi";
-import { mockTransactions } from "../../constants";
+import { RiErrorWarningFill, RiHeart2Fill } from "react-icons/ri";
+import { useAccount, useBalance, useChainId, useDisconnect, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { contractAbi, contractAddress, mockTransactions } from "../../constants";
 import { TransactionProps } from "../../types";
 import TransactionCard from "@/components/TransactionCard";
+import { CgSpinner } from "react-icons/cg";
+import { createPublicClient, parseEther } from "viem";
+import { sepolia } from "wagmi/chains";
 
 export default function Home() {
   const [addressTo, setAddressTo] = useState("");
   const [amount, setAmount] = useState("");
   const [keyword, setKeyword] = useState("");
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  let [logs, setLogs] = useState([]);
   const chainId = useChainId();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
@@ -31,7 +36,7 @@ export default function Home() {
     switch (chainId) {
       case 1:
         chainName = "Ethereum Mainnet"
-        break;
+        break;false
       case 137:
         chainName = "Polygon"
         break;
@@ -57,13 +62,88 @@ export default function Home() {
     return chainName;
   }
 
-  function handleSend(event: FormEvent<HTMLFormElement>) {
+  const {
+    data: transferHash,
+    isPending: isTransferPending,
+    isError: isTransferError,
+    error: transferError,
+    writeContractAsync: writeTransferAsync,
+  } = useWriteContract();
+
+  const {
+    isLoading: isTransferConfirming,
+    isSuccess: isTransferConfirmed,
+    isError: isTransferErrorFinal,
+    data: dataFromTransferReceipt,
+  } = useWaitForTransactionReceipt({
+    confirmations: 1,
+    hash: transferHash,
+  })
+
+  async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("address: ", addressTo)
-    console.log("amount: ", amount)
-    console.log("keyword: ", keyword)
-    console.log("message: ", message)
+    try {
+      const txHash = await writeTransferAsync({
+        abi: contractAbi,
+        address: contractAddress as `0x${string}`,
+        functionName: "transferEth",
+        args: [addressTo, message],
+        value: parseEther(amount)
+      })
+      console.log("Transfer transaction submitted:", txHash)
+    } catch (error) {
+      console.error("Error in the Transfer:", error)
+    }
   }
+
+  function getButtonContent() {
+    if (isTransferPending) {
+      return (
+          <div className="flex text-white justify-center items-center space-x-2">
+              <CgSpinner className="animate-spin" size={20}/>
+              <span>Confirming in Wallet...</span>
+          </div> as ReactNode
+      )
+    }
+    if(isTransferError || isTransferErrorFinal) {
+      return (
+          <div className="flex text-red-600 justify-center items-center space-x-2">
+              <RiErrorWarningFill size={20}/>
+              <span>Transfering Error, check console</span>
+          </div> as ReactNode
+      )
+    }
+    if (isTransferConfirming) {
+      return (
+          <div className="flex text-white justify-center items-center space-x-2">
+              <CgSpinner className="animate-spin" size={20} />
+              <span>Confirming the Transfer...</span>
+          </div>
+      )
+    }
+    return (
+        <div className="flex text-white justify-center items-center space-x-2">
+            <FaEthereum size={20}/>
+            <span>Send Now</span>
+        </div>
+    ) as ReactNode
+  }
+
+  useEffect(() => {
+    if (isSuccess) {
+        const timer = setTimeout(() => {
+            setIsSuccess(false);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }
+  }, [isSuccess]); 
+  
+  useEffect(() => {
+    if(isTransferConfirmed) {
+      setIsSuccess(true)
+    }
+  }, [isTransferConfirmed]);
 
   return (
     <>
@@ -155,11 +235,33 @@ export default function Home() {
                 <br />
               </div>
               <hr />
+              {!isConnected && 
+                <div className={`flex items-center space-x-2 ${isTransferError || isTransferErrorFinal ? "text-red-600" : "text-yellow-600"}`}>
+                  <svg 
+                        stroke="currentColor" 
+                        fill="currentColor" 
+                        strokeWidth="0" 
+                        viewBox="0 0 24 24" 
+                        height="20" 
+                        width="20" 
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M12.8659 3.00017L22.3922 19.5002C22.6684 19.9785 22.5045 20.5901 22.0262 20.8662C21.8742 20.954 21.7017 21.0002 21.5262 21.0002H2.47363C1.92135 21.0002 1.47363 20.5525 1.47363 20.0002C1.47363 19.8246 1.51984 19.6522 1.60761 19.5002L11.1339 3.00017C11.41 2.52187 12.0216 2.358 12.4999 2.63414C12.6519 2.72191 12.7782 2.84815 12.8659 3.00017ZM10.9999 16.0002V18.0002H12.9999V16.0002H10.9999ZM10.9999 9.00017V14.0002H12.9999V9.00017H10.9999Z"></path>
+                  </svg>
+                  <p>Warning: Please connect your wallet</p>
+                </div>
+              }
+              {isSuccess &&
+                <div className="flex justify-center space-x-3 bg-green-500 text-white mt-7 p-4 rounded-3xl mr-40">
+                  <p>✅</p>
+                  <span>Eth amount transfered successfully !</span>
+                </div>
+              }
               <button 
                 type="submit" 
                 className="border border-gray-600 w-full py-3 rounded-4xl text-white hover:cursor-pointer shadow shadow-gray-600 hover:shadow-md transition-shadow"
               >
-                Send now
+                {getButtonContent()}
               </button>
             </form>
           </div>

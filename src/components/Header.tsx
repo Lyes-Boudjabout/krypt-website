@@ -1,32 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
-
-interface NavLink {
-    name: string,
-    link: string
-}
+import { navLinks } from "../../constants";
+import { NavLink } from "../../types";
 
 export default function Header() {
-    const navLinks: NavLink[] = [
-        {
-            name: "Market",
-            link: "/market"
-        },
-        {
-            name: "Exchange",
-            link: "/exchange"
-        },
-        {
-            name: "Tutorials",
-            link: "/tutorials"
-        },
-        {
-            name: "Wallets",
-            link: "/wallets"
-        },
-    ];
-
     return (
         <header className="text-white font-normal flex justify-between py-10 px-75 z-0">
             <Image

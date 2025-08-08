@@ -5,17 +5,19 @@ import { NavLink } from "../../types";
 
 export default function Footer() {
     return (
-        <footer className="gradient-bg-footer text-white py-10 px-30 space-y-5">
-            <div className="flex justify-between items-center">
-                <Image
-                    src={"/logo.png"}
-                    alt="Krypt"
-                    height={120}
-                    width={240}
-                />
-                <div className="flex text-xl space-x-30">
+        <footer className="gradient-bg-footer text-white md:py-10 md:px-30 py-8 px-8 space-y-5">
+            <div className="md:flex justify-between items-center">
+                <div className="flex justify-center mb-8">
+                   <Image
+                        src={"/logo.png"}
+                        alt="Krypt"
+                        height={120}
+                        width={240}
+                    /> 
+                </div>
+                <div className="flex justify-between text-xl md:space-x-30 space-y-2 ">
                     {navLinks.map((element: NavLink, index: number) => 
-                        <Link href={element.link} key={index}>
+                        <Link href={element.link} key={index} className="flex justify-center">
                             {element.name}
                         </Link>    
                     )}
@@ -26,7 +28,7 @@ export default function Footer() {
                 <p>nl_boudjabout@esi.dz</p>
             </div>
             <hr />
-            <div className="flex justify-between">
+            <div className="md:flex justify-between">
                 <p>Github: <a href="https://github.com/Lyes-Boudjabout" target="_blank">@Lyes-Boudjabout</a></p>
                 <p>All rights reserved</p>
             </div>

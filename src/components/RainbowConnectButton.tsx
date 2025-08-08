@@ -40,7 +40,7 @@ export function RainbowConnectButton() {
             <button
               onClick={openConnectModal}
               type="button"
-              className="flex items-center space-x-3 px-6 py-4 bg-indigo-600 text-white text-xl rounded-lg hover:bg-indigo-700 transition"
+              className="flex items-center space-x-3 px-6 py-4 bg-indigo-600 text-white md:text-xl text-lg rounded-lg hover:bg-indigo-700 transition-colors"
             >
               {status !== 'connecting' ? <FaWallet/> : <CgSpinner className='animate-spin' size={30}/>}
               <span>{connected ? 'Connected' : status === 'connecting' ? 'Confirming in Wallet...' : 'Connect Wallet'}</span>

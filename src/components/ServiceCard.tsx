@@ -7,8 +7,8 @@ export default function ServiceCard({ title, description, style, icon: Icon }: S
                 <Icon size={30}/>
             </div>
             <div>
-                <p className="text-lg">{title}</p>
-                <p className="text-md">{description}</p>
+                <p className="text-xl md:text-lg mb-1 font-black">{title}</p>
+                <p className="text-md font-lighter">{description}</p>
             </div>
         </div>
         

@@ -14,8 +14,7 @@ import { contractAbi, contractAddress, mockTransactions } from "../../constants"
 import { TransactionProps } from "../../types";
 import TransactionCard from "@/components/TransactionCard";
 import { CgSpinner } from "react-icons/cg";
-import { createPublicClient, parseEther } from "viem";
-import { sepolia } from "wagmi/chains";
+import { parseEther } from "viem";
 
 export default function Home() {
   const [addressTo, setAddressTo] = useState("");
@@ -23,13 +22,22 @@ export default function Home() {
   const [keyword, setKeyword] = useState("");
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  let [logs, setLogs] = useState([]);
   const chainId = useChainId();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
   const { data } = useBalance({
     address,
   });
+
+  const shortenAddress = (address: `0x${string}` | undefined) => {
+    if (typeof address == undefined) {
+      return "";
+    } else {
+      return `${address?.slice(0, 5) ? address?.slice(0, 5) : ""}
+              ...
+              ${address?.slice(address.length - 4) ? address?.slice(address.length - 4) : ""}`;
+    }
+  }
 
   function getChainName(chainId: number): string {
     let chainName: string = "";
@@ -147,14 +155,14 @@ export default function Home() {
 
   return (
     <>
-      <main className="gradient-bg-welcome">
+      <main className="gradient-bg-welcome w-full">
         <Header/>
-        <section className="flex w-full px-65 py-20">
-          <div className="w-1/2 space-y-8 space-x-25">
-            <p className="text-gradient text-6xl pr-7">
+        <section className="md:flex w-full md:px-65 md:py-20 px-10 py-10">
+          <div className="md:w-1/2 space-y-8 space-x-25">
+            <p className="text-gradient md:text-6xl text-4xl md:pr-7">
               Send Crypto across the world
             </p>
-            <p className="text-gradient text-xl font-light pr-30">
+            <p className="text-gradient md:text-xl text-lg font-light md:pr-30">
               Explore the crypto world. Buy and sell cryptocurrencies easily on Krypto.
             </p>
             <div className="flex items-center space-x-5">
@@ -168,7 +176,7 @@ export default function Home() {
                 </button>
               }
             </div>
-            <div className="flex flex-wrap w-full text-md mt-25">
+            <div className="flex flex-wrap w-full text-md md:mt-25 mt-15">
               <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-tl-4xl">Reliability</p>
               <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400">Security</p>
               <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-tr-4xl">Ethereum</p>
@@ -177,7 +185,7 @@ export default function Home() {
               <p className="flex justify-center py-10 w-1/3 border border-gray-600 text-gray-400 rounded-br-4xl">Blockchain</p>
             </div>
           </div>
-          <div className="w-1/2 mx-25">
+          <div className="md:w-1/2 md:mx-25 mt-15 md:mt-0">
             <div className="eth-card p-5 mx-20 space-y-10 text-white rounded-2xl overflow-hidden">
               <div className="flex justify-between">
                 <div className="border border-white rounded-4xl p-2">
@@ -192,10 +200,10 @@ export default function Home() {
                   {getChainName(chainId)}
                 </p>
                 <p>
-                  {`${address}`}
+                  {`${shortenAddress(address)}`}
                 </p>
                 <div>
-                  Balance: {data?.formatted} {data?.symbol}
+                  Balance: {data?.formatted ? data.formatted : 0} {data?.symbol}
                 </div>
               </div>
             </div>
@@ -268,16 +276,16 @@ export default function Home() {
         </section>
       </main>
       <main className="gradient-bg-services">
-        <section className="flex items-center w-full px-65 py-40">
-          <div className="w-1/2 space-y-6">
-            <p className="text-gradient text-5xl pr-7">
+        <section className="md:flex items-center w-full md:px-65 md:py-40 py-20 p-10">
+          <div className="md:w-1/2 space-y-6">
+            <p className="text-gradient md:text-5xl text-3xl md:pr-7 text-center md:text-start">
               Services that we continue to improve
             </p>
-            <p className="text-gradient text-lg font-light pr-30">
+            <p className="text-gradient md:text-lg text-md font-light md:pr-30 mb-7 text-center md:text-start">
               The best choice for buying and selling your crypto assets, with the various super friendly services we offer
             </p>
           </div>
-          <div className="w-1/2 space-y-6 text-white px-10">
+          <div className="md:w-1/2 space-y-6 text-white md:px-10">
               <ServiceCard
                 title="Security gurantee"
                 description="Security is guranteed. We always maintain privacy and maintain the quality of our products"
@@ -300,9 +308,9 @@ export default function Home() {
         </section>
       </main>
       <main className="gradient-bg-transactions">
-        <section className="py-20 px-15">
+        <section className="md:py-20 md:px-15 py-20 px-15">
           <p className="text-gradient text-5xl text-center">Latest Transactions</p>
-          <div className="flex flex-wrap justify-around overflow-hidden px-5 py-15 text-lg space-x-5 w-full">
+          <div className="flex flex-nowrap md:flex-wrap md:justify-around overflow-x-auto md:overflow-visible py-15 text-lg space-x-5 px-4 scroll-snap-x mandatory custom-scrollbar">
             {mockTransactions.map((element: TransactionProps, index: number) => 
               <TransactionCard {...element} key={index}/>
             )}
